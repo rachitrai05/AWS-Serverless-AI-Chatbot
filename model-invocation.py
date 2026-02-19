@@ -36,7 +36,7 @@ def lambda_handler(event, context):
     # conversation_id = '100'
     try:
         db_response = table.get_item(
-            Key={'conversation_id': conversation_id}
+            Key={'conversationId': conversation_id}
         )
         db_history = db_response.get('Item', {}).get('history', [])
     except Exception as e:
