@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --sidebar-bg:#171717;
+  --main-bg:#212121;
+  --input-bg:#2f2f2f;
+  --accent:#3b82f6;
+  --error:#ef4444;
+}
+
+*{box-sizing:border-box}
+body,html{
+  margin:0;height:100%;
+  font-family:Inter,sans-serif;
+  background:var(--main-bg);
+  color:#ececec;
+}
+
+/* ---------- AUTH ---------- */
+#auth-view{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+}
+.auth-card{
+  width:360px;
+  padding:36px;
+  border-radius:20px;
+  background:#171717;
+}
+.auth-card h2{margin-bottom:20px;text-align:center}
+
+.auth-group{margin-bottom:14px}
+.auth-group label{
+  font-size:13px;color:#aaa;display:block;margin-bottom:6px;
+}
+.auth-input{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #444;
+  background:#0f0f0f;
+  color:white;
+}
+
+.auth-btn{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:5%;
+}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed}
+
+.auth-switch{
+  text-align:center;
+  font-size:13px;
+  color:#aaa;
+  margin-top:16px;
+  cursor:pointer;
+}
+
+.error-box{
+  background:#2a1212;
+  color:#fecaca;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:14px;
+  font-size:13px;
+  display:none;
+}
+
+/* ---------- APP ---------- */
+.app-container{display:none;height:100vh;flex-direction:column}
+.top-header{
+  height:60px;
+  background:var(--sidebar-bg);
+  border-bottom:1px solid #333;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+}
+.welcome-text{
+  font-size:18px;
+  font-weight:500;
+  color:#ececec;
+}
+.app-content{
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+.sidebar{
+  width:260px;
+  padding:20px;
+  background:var(--sidebar-bg);
+  border-right:1px solid #333;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+}
+.chat-main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+
+#chat-history {
+  width: 100%;
+  max-width: 800px;
+  padding: 30px;
+  flex: 1;
+  overflow-y: scroll; /* keep scrolling */
+  
+  /* Hide scrollbar for Chrome, Safari, Edge */
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* Internet Explorer and Edge */
+}
+
+#chat-history::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+
+/* ---------- MESSAGES ---------- */
+.msg-row{display:flex;margin-bottom:20px}
+.msg-row.user{justify-content:flex-end}
+.msg-row.ai{justify-content:flex-start}
+
+.bubble{
+  max-width:70%;
+  padding:12px 16px;
+  border-radius:14px;
+  line-height:1.4;
+}
+.user .bubble{
+  background:#4f46e5;
+  border-bottom-right-radius:4px;
+}
+.ai .bubble{
+  background:#2f2f2f;
+  border-bottom-left-radius:4px;
+}
+
+/* ---------- INPUT ---------- */
+.input-box{
+  width:90%;
+  max-width:760px;
+  display:flex;
+  gap:10px;
+  background:var(--input-bg);
+  padding:12px;
+  border-radius:14px;
+  margin-bottom:20px;
+}
+
+#user-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 15px;
+  outline: none; /* optional: removes default outline always */
+}
+
+#user-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#user-input:disabled{opacity:.6}
+
+.loader{
+  font-size:13px;
+  color:#aaa;
+  margin-top:8px;
+}
+
+/* ---------- SIDEBAR ---------- */
+.conv-btn{
+  background:#2a2a2a;
+  border:1px solid #444;
+  color:white;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:10px;
+  text-align:left;
+  cursor:pointer;
+}
+.sidebar-loader{
+  margin-top:10px;
+  margin-bottom:5%;
+  padding: 10px;
+}
+.hidden{display:none}
+
+.msg-send-button{
+  background:transparent;
+  color:white;
+  border:none;
+}
+
+/* ---------- WELCOME SCREEN ---------- */
+.welcome-screen{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+  text-align:center;
+}
+
+.welcome-screen h2{
+  font-size:28px;
+  margin-bottom:12px;
+  color:#ececec;
+}
+
+.welcome-screen p{
+  font-size:16px;
+  color:#aaa;
+  margin-bottom:30px;
+  max-width:500px;
+}
+
+.welcome-btn{
+  padding:14px 28px;
+  border-radius:10px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.welcome-btn:hover{
+  opacity:0.9;
+}
+
+.input-box.hidden{
+  display:none;
+}
+
+/* ---------- SPINNERS & LOADERS ---------- */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 3px solid var(--accent);
+  width: 24px;
+  height: 24px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  border-top-width: 2px;
+}
+
+.spinner-large {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
+  border-top-width: 4px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-overlay p {
+  color: #ececec;
+  font-size: 16px;
+}
+
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.message-loader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #2f2f2f;
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  max-width: 70%;
+  margin-bottom: 20px;
+}
+
+.message-loader .spinner {
+  margin-right: 0;
+}
+
+.message-loader span {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.button-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.button-loading .spinner {
+  margin-right: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.button-loading span {
+  opacity: 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- AUTH -->
+<div id="auth-view">
+  <div class="auth-card" id="login-form">
+    <h2>Sign In</h2>
+    <div class="error-box" id="login-error"></div>
+
+    <div class="auth-group">
+      <label>Email</label>
+      <input id="login-email" class="auth-input" placeholder="Enter your email">
+    </div>
+    <div class="auth-group">
+      <label>Password</label>
+      <input id="login-pass" type="password" class="auth-input" placeholder="Enter your password">
+    </div>
+
+    <button class="auth-btn" id="login-btn" onclick="handleLogin()">Login</button>
+    <div class="auth-switch" onclick="toggleAuth(false)">Create account</div>
+  </div>
+
+  <div class="auth-card hidden" id="register-form">
+    <h2>Register</h2>
+    <div class="error-box" id="register-error"></div>
+
+    <div class="auth-group">
+      <label>Name</label>
+      <input id="reg-name" class="auth-input" placeholder="Enter your name">
+    </div>
+    <div class="auth-group">
+      <label>Email</label>
+      <input id="reg-email" class="auth-input" placeholder="Enter your email">
+    </div>
+    <div class="auth-group">
+      <label>Password</label>
+      <input id="reg-pass" type="password" class="auth-input" placeholder="Enter your password">
+    </div>
+
+    <button class="auth-btn" id="register-btn" onclick="handleRegister()">Sign Up</button>
+    <div class="auth-switch" onclick="toggleAuth(true)">Already have an account?</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-container" id="app-container">
+  <div class="top-header">
+    <div class="welcome-text" id="welcome-text">Welcome</div>
+  </div>
+  
+  <div class="app-content">
+    <div class="sidebar">
+      <button class="auth-btn" onclick="newChat()">+ New Chat</button>
+      <div id="conversation-list"></div>
+      <div class="sidebar-loader hidden" id="sidebar-loader">
+        <div class="loading-inline">
+          <div class="spinner spinner-small"></div>
+          <span>Loading conversations…</span>
+        </div>
+      </div>
+      <button class="auth-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="chat-main">
+    <div id="welcome-screen" class="welcome-screen">
+      <h2>Welcome to AI Chat</h2>
+      <p>Start a new conversation or select an existing one from the sidebar to begin chatting.</p>
+      <button class="welcome-btn" onclick="newChat()">+ Create New Chat</button>
+    </div>
+    <div id="chat-history"></div>
+    <div class="input-box hidden" id="input-box">
+      <input id="user-input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()" class="msg-send-button">Send</button>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOGIN_API="https://gitu2m6lnl.execute-api.us-east-1.amazonaws.com/dev/login";
+const REGISTER_API="https://gitu2m6lnl.execute-api.us-east-1.amazonaws.com/dev/register";
+const CHAT_API="https://6qrqt99dnd.execute-api.us-east-1.amazonaws.com/dev/bedRockInvoke";
+const HISTORY_API="https://6qrqt99dnd.execute-api.us-east-1.amazonaws.com/dev/history";
+const GEN_CONVO_API="https://gitu2m6lnl.execute-api.us-east-1.amazonaws.com/dev/generateConvoId";
+
+/* ---------- HELPERS ---------- */
+function showError(id,msg){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.style.display="block";
+  setTimeout(()=>el.style.display="none",4000);
+}
+function toggleAuth(showLogin){
+  document.getElementById("login-form").classList.toggle("hidden",!showLogin);
+  document.getElementById("register-form").classList.toggle("hidden",showLogin);
+}
+
+/** Safely parse API Gateway/Lambda proxy responses.
+ * If the JSON has a 'body' string, parse it. Otherwise return as-is.
+ */
+async function parseLambdaJson(res){
+  const data = await res.json();
+  if (data && typeof data.body === "string") {
+    try { return JSON.parse(data.body); } catch { /* fallback to raw data below */ }
+  }
+  return data;
+}
+
+/* ---------- LOADER HELPERS ---------- */
+function showLoadingOverlay(message = "Loading..."){
+  const overlay = document.createElement("div");
+  overlay.className = "loading-overlay";
+  overlay.id = "loading-overlay";
+  overlay.innerHTML = `
+    <div class="spinner spinner-large"></div>
+    <p>${message}</p>
+  `;
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function hideLoadingOverlay(){
+  const overlay = document.getElementById("loading-overlay");
+  if (overlay) overlay.remove();
+}
+
+function setButtonLoading(btn, isLoading, originalText){
+  if (isLoading) {
+    btn.disabled = true;
+    btn.classList.add("button-loading");
+    btn.innerHTML = `<div class="spinner spinner-small"></div><span>${originalText}</span>`;
+  } else {
+    btn.disabled = false;
+    btn.classList.remove("button-loading");
+    btn.textContent = originalText;
+  }
+}
+
+/* ---------- AUTH ---------- */
+async function handleLogin(){
+  const btn = document.getElementById("login-btn");
+  const originalText = "Login";
+  btn.disabled = true;
+  btn.textContent = "Logging...";
+
+  try {
+    const res = await fetch(LOGIN_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("login-email").value,
+        password: document.getElementById("login-pass").value
+      })
+    });
+
+    if (!res.ok) throw new Error("Invalid credentials");
+
+    const apiResponse = await res.json();
+    console.log("login api response", apiResponse);
+    const parsed = JSON.parse(apiResponse.body);
+    const user = parsed.user;
+    console.log("login data backend->", user);
+
+    // Save auth info
+    localStorage.setItem("activeUser", JSON.stringify(user));
+    localStorage.setItem("authToken", user.token);
+    localStorage.setItem("tokenExpiresAt", user.tokenExpiresAt);
+
+    initChat(user);
+
+  } catch (e) {
+    showError("login-error", e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function handleRegister(){
+  const btn = document.getElementById("register-btn");
+  const originalText = "Sign Up";
+  btn.disabled = true;
+  btn.textContent = "Registering...";
+
+  try {
+    const res = await fetch(REGISTER_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: document.getElementById("reg-name").value,
+        email: document.getElementById("reg-email").value,
+        password: document.getElementById("reg-pass").value
+      })
+    });
+
+    if (!res.ok) throw new Error("Registration failed");
+
+    const apiResponse = await res.json();
+    console.log("registration response", apiResponse);
+    const parsed = JSON.parse(apiResponse.body);
+    const user = parsed.user;
+    console.log("registration data backend->", user);
+
+    // Save auth info
+    localStorage.setItem("activeUser", JSON.stringify(user));
+    localStorage.setItem("authToken", user.token);
+    localStorage.setItem("tokenExpiresAt", user.tokenExpiresAt);
+
+    initChat(user);
+
+  } catch (e) {
+    showError("register-error", e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+/* ---------- CHAT ---------- */
+function updateWelcomeMessage(){
+  try {
+    const userStr = localStorage.getItem("activeUser");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      const welcomeText = document.getElementById("welcome-text");
+      if (welcomeText && user.name) {
+        welcomeText.textContent = `Welcome ${user.name}`;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to update welcome message:", e);
+  }
+}
+
+async function initChat(user){
+  // Double-check token validity before initializing chat
+  if (!isTokenValid()) {
+    localStorage.clear();
+    removeConversationIdFromUrl();
+    document.getElementById("auth-view").style.display = "flex";
+    document.getElementById("app-container").style.display = "none";
+    showError("login-error", "Session expired. Please login again.");
+    return;
+  }
+
+  document.getElementById("auth-view").style.display="none";
+  document.getElementById("app-container").style.display="flex";
+  
+  // Update welcome message with user's name
+  updateWelcomeMessage();
+  const sidebarLoader = document.getElementById("sidebar-loader");
+  sidebarLoader.classList.remove("hidden");
+  sidebarLoader.innerHTML = `
+    <div class="loading-inline">
+      <div class="spinner spinner-small"></div>
+      <span>Loading conversations…</span>
+    </div>
+  `;
+
+  try {
+    const hist = await fetchHistory(user.userId);
+    document.getElementById("sidebar-loader").classList.add("hidden");
+    renderConversations(Array.isArray(hist?.conversations) ? hist.conversations : []);
+    
+    // Check if conversationId exists in URL after loading conversations
+    checkConversationIdOnLoad();
+  } catch (e) {
+    document.getElementById("sidebar-loader").classList.add("hidden");
+    // If error is about expired session, redirect to login
+    if (e.message && e.message.includes("Session expired")) {
+      localStorage.clear();
+      removeConversationIdFromUrl();
+      document.getElementById("auth-view").style.display = "flex";
+      document.getElementById("app-container").style.display = "none";
+      showError("login-error", e.message);
+    } else {
+      showError("login-error", e.message || "Failed to load conversations.");
+      renderConversations([]);
+      // Show welcome screen if no conversations loaded
+      checkConversationIdOnLoad();
+    }
+  }
+}
+
+async function fetchHistory(userId){
+  // Check token validity before fetching history
+  if (!isTokenValid()) {
+    throw new Error("Session expired. Please login again.");
+  }
+
+  const res = await fetch(HISTORY_API, {
+    method: "POST",
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ userId })
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`History fetch failed (${res.status}). ${text || ""}`.trim());
+  }
+
+  const parsed = await parseLambdaJson(res);
+  console.log("history data from backend", parsed);
+  return parsed; // expecting { conversations: [...] }
+}
+
+function renderConversations(convos){
+  const convoList = document.getElementById("conversation-list");
+  convoList.innerHTML="";
+  convos.forEach(c=>{
+    const title=c.history?.[0]?.user || "New conversation";
+    const btn=document.createElement("button");
+    btn.className="conv-btn";
+    btn.textContent=title.slice(0,30);
+    btn.onclick=()=>loadConversation(c);
+    convoList.appendChild(btn);
+  });
+}
+
+function loadConversation(c){
+  history.replaceState(null,"",`?conversationId=${c.conversationId}`);
+  const chatHistory = document.getElementById("chat-history");
+  chatHistory.innerHTML="";
+  c.history.forEach(h=>{
+    append("user",h.user);
+    append("ai",h.assistant);
+  });
+  // Show input box and hide welcome screen when conversation is loaded
+  showChatInterface();
+}
+
+function append(type,text){
+  const r=document.createElement("div");
+  r.className=`msg-row ${type}`;
+  const bubble = document.createElement("div");
+  bubble.className="bubble";
+  bubble.textContent = text; // safer than innerHTML
+  r.appendChild(bubble);
+  const chatHistory = document.getElementById("chat-history");
+  chatHistory.appendChild(r);
+  chatHistory.scrollTop=chatHistory.scrollHeight;
+}
+
+async function sendMessage(){
+  // Check token validity before sending message
+  if (!isTokenValid()) {
+    showError("login-error", "Session expired. Please login again.");
+    logout();
+    return;
+  }
+
+  // Ensure conversationId is present
+  const convoId=new URLSearchParams(location.search).get("conversationId");
+  if (!convoId) {
+    showError("login-error", "Please create or select a conversation first.");
+    return;
+  }
+
+  const input=document.getElementById("user-input");
+  if(!input.value.trim())return;
+  append("user",input.value);
+  const text=input.value;
+  input.value="";
+  input.disabled=true;
+  
+  // Show message loader
+  const loader=document.createElement("div");
+  loader.className="message-loader";
+  loader.innerHTML = `
+    <div class="spinner spinner-small"></div>
+    <span>AI is thinking…</span>
+  `;
+  const chatHistory = document.getElementById("chat-history");
+  chatHistory.appendChild(loader);
+  chatHistory.scrollTop=chatHistory.scrollHeight;
+  
+  try{
+    const res=await fetch(CHAT_API,{
+      method:"POST",
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text,conversationId:convoId})
+    });
+    if (!res.ok) {
+      throw new Error("Chat API failed");
+    }
+    const data = await parseLambdaJson(res);
+    console.log("chat response", data);
+    loader.remove();
+    append("ai", data.response ?? "No response from AI");
+  }catch{
+    loader.remove();
+    append("ai","Something went wrong.");
+  }finally{
+    input.disabled=false;
+    input.focus();
+  }
+}
+
+async function newChat(){
+  // Check token validity before creating new chat
+  if (!isTokenValid()) {
+    showError("login-error", "Session expired. Please login again.");
+    removeConversationIdFromUrl();
+    logout();
+    return;
+  }
+
+  // Show loading overlay
+  const overlay = showLoadingOverlay("Creating new chat...");
+
+  try {
+    const user=JSON.parse(localStorage.getItem("activeUser"));
+    const res=await fetch(GEN_CONVO_API,{
+      method:"POST",
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId:user.userId})
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(()=> "");
+      hideLoadingOverlay();
+      showError("login-error", `Failed to start a new chat (${res.status}). ${text || ""}`.trim());
+      return;
+    }
+
+    const parsed = await parseLambdaJson(res);
+    console.log("generate conversation id backend", parsed);
+
+    const convoId = parsed?.conversationId;
+    if (!convoId) {
+      hideLoadingOverlay();
+      showError("login-error", "Could not get a new conversation ID.");
+      return;
+    }
+
+    // Set conversation ID in URL and show chat interface
+    history.replaceState(null,"",`?conversationId=${convoId}`);
+    document.getElementById("chat-history").innerHTML="";
+    hideLoadingOverlay();
+    showChatInterface();
+  } catch (e) {
+    hideLoadingOverlay();
+    showError("login-error", "Failed to create new chat. Please try again.");
+  }
+}
+
+function removeConversationIdFromUrl(){
+  // Remove conversationId from URL query parameters
+  const url = new URL(window.location.href);
+  url.searchParams.delete("conversationId");
+  history.replaceState(null, "", url.pathname + (url.search ? url.search : ""));
+}
+
+function logout(){
+  localStorage.clear();
+  removeConversationIdFromUrl();
+  location.reload();
+}
+
+/* ---------- CHAT INTERFACE HELPERS ---------- */
+function showChatInterface(){
+  // Hide welcome screen and show input box
+  document.getElementById("welcome-screen").style.display = "none";
+  document.getElementById("input-box").classList.remove("hidden");
+  // Focus on input for better UX
+  document.getElementById("user-input").focus();
+}
+
+function showWelcomeScreen(){
+  // Show welcome screen and hide input box
+  document.getElementById("welcome-screen").style.display = "flex";
+  document.getElementById("input-box").classList.add("hidden");
+}
+
+function checkConversationIdOnLoad(){
+  // Check if conversationId exists in URL on page load
+  const convoId = new URLSearchParams(location.search).get("conversationId");
+  if (convoId) {
+    // Conversation ID exists, show chat interface
+    showChatInterface();
+  } else {
+    // No conversation ID, show welcome screen
+    showWelcomeScreen();
+  }
+}
+
+/* ---------- TOKEN VALIDATION ---------- */
+function isTokenValid(){
+  const token = localStorage.getItem("authToken");
+  const tokenExpiresAt = localStorage.getItem("tokenExpiresAt");
+  
+  // Check if token exists
+  if (!token || !tokenExpiresAt) {
+    return false;
+  }
+  
+  // Check if token is expired
+  // tokenExpiresAt is a Unix timestamp (seconds)
+  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  const expiryTime = parseInt(tokenExpiresAt, 10);
+  
+  if (isNaN(expiryTime)) {
+    console.error("Invalid token expiry format");
+    return false;
+  }
+  
+  // Token is valid if current time is less than expiry time
+  return currentTime < expiryTime;
+}
+
+function checkAuthOnLoad(){
+  // Remove conversation ID from URL on every page reload
+  removeConversationIdFromUrl();
+  
+  if (isTokenValid()) {
+    // Token is valid, restore user session
+    const userStr = localStorage.getItem("activeUser");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        // Update welcome message immediately
+        updateWelcomeMessage();
+        initChat(user);
+      } catch (e) {
+        console.error("Failed to parse user data:", e);
+        // Clear invalid data
+        localStorage.clear();
+      }
+    } else {
+      // Token exists but no user data, clear everything
+      localStorage.clear();
+    }
+  } else {
+    // Token is missing or expired, show auth view
+    localStorage.clear(); // Clear expired token
+    document.getElementById("auth-view").style.display = "flex";
+    document.getElementById("app-container").style.display = "none";
+  }
+}
+
+// Check authentication status when page loads
+window.addEventListener("DOMContentLoaded", checkAuthOnLoad);
+
+// Listen for URL changes (back/forward navigation)
+window.addEventListener("popstate", function() {
+  if (document.getElementById("app-container").style.display !== "none") {
+    checkConversationIdOnLoad();
+  }
+});
+</script>
+</body>
+</html>
