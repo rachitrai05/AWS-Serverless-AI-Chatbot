@@ -92,7 +92,7 @@ When a user sends a message:
 ```
 ## 📊 Workflow_Architecture_Diagram
 
-![alt text](Workflow_Architecture_Diagram.jpeg)
+![alt text](Workflow_Architecture_Diagram.png)
 ---
 
 # 🧠 AI Layer
