@@ -18,7 +18,7 @@
 ## 🌐 Live Demo
 
 🔗 **Frontend URL:**
-[Click Here ](https://new-bucket-rach.s3.us-east-1.amazonaws.com/index.html)
+[Click Here ](http://rachit-host-website.s3-website-us-east-1.amazonaws.com)
 
 ---
 
