@@ -18,8 +18,13 @@
 ## 🌐 Live Demo
 
 🔗 **Frontend URL:**
-`http://new-bucket-rach.s3-website-us-east-1.amazonaws.com`
+[Click Here ](http://new-bucket-rach.s3-website-us-east-1.amazonaws.com)
 
+---
+
+## 📚 Documentation
+
+- [Click Here](./setup.md) to see how to setup the full project.
 ---
 
 # 📌 Overview
@@ -56,6 +61,10 @@ When a user sends a message:
 
 ---
 
+## 📊 Application Architecture Diagram
+
+![alt text](Application_Architecture.png)
+
 ## 📊 High-Level Architecture Diagram
 
 ```
@@ -78,8 +87,12 @@ When a user sends a message:
   DynamoDB        Amazon Bedrock      Auth Logic
 (user-data)       (Nova Micro)     (user-data)
 (conversation_data)
-```
 
+
+```
+## 📊 Workflow_Architecture_Diagram
+
+![alt text](Workflow_Architecture_Diagram.jpeg)
 ---
 
 # 🧠 AI Layer
