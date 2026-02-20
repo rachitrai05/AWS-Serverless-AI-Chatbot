@@ -90,7 +90,7 @@ When a user sends a message:
 
 
 ```
-## 📊 Workflow_Architecture_Diagram
+## 📊 Workflow Architecture Diagram
 
 ![alt text](Workflow_Architecture_Diagram.png)
 ---
